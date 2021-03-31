@@ -1,0 +1,9 @@
+{
+  "name": "scriptJogoDaVelha",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "repository": "https://github.com/marcoseplus/scriptJogoDaVelha.git",
+  "author": "marcoshenriquemaia <henriquemarcosmaia@gmail.com>",
+  "license": "MIT"
+}

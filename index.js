@@ -1,10 +1,11 @@
 import test from './index.test.js'
 
 const sceneryTest = ['X', 'O', '', 
-                      '', 'O', 'X', 
-                      '', '', '']
+                      '', 'X', 'X', 
+                      '', '', 'O']
 
 const evailsonScript = (scenery, myMove) => {
+  let playIndex = 0
   const abstractSceneryMap = {
     firstDia: [0, 4, 8],
     secondDia: [2, 4, 6],
@@ -16,14 +17,26 @@ const evailsonScript = (scenery, myMove) => {
     thirdCol: [2, 5, 8],
   }
 
-  if(aboutToWin(scenery, myMove).isAboutToWin) {
-    return aboutToWin(scenery, myMove).onIndex
-  }
+  // Win on imminence
+  let intScenery = toIntegerScenery(scenery, myMove)
+  let intAbstract = abstractScenery(intScenery)
 
-  if(aboutToLose(scenery, myMove).isAboutToLose) {
-    return aboutToLose(scenery, myMove).onIndex
-  }
-  
+  Object.keys(intAbstract).forEach(key => {
+    if(intAbstract[key].reduce((a, b) => a + b, 0) === 2) {
+      playIndex = abstractSceneryMap[key][intAbstract[key]?.indexOf(0)]
+    } 
+  })
+
+  // Don't lose on iminence
+  intScenery = toIntegerScenery(scenery, invertPointOfView(myMove))
+  intAbstract = abstractScenery(intScenery)
+
+  Object.keys(intAbstract).forEach(key => {
+    if(intAbstract[key].reduce((a, b) => a + b, 0) === 2) {
+      playIndex = abstractSceneryMap[key][intAbstract[key]?.indexOf(0)]
+    }
+  })
+
   function toIntegerScenery(scenery, pointOfView) {
     const intScenery = []
 
@@ -59,40 +72,6 @@ const evailsonScript = (scenery, myMove) => {
     return sceneryAbstraction
   }
 
-  function aboutToWin(scenery, myMove) {
-    const intScenery = toIntegerScenery(scenery, myMove)
-    const intAbstract = abstractScenery(intScenery)
-    let isAboutToWin = false
-    let onKey = ''
-    let onIndex;
-    
-    Object.keys(intAbstract).forEach(key => {
-      if(intAbstract[key].reduce((a, b) => a + b, 0) === 2) {
-        isAboutToWin = true
-        onIndex = abstractSceneryMap[key][intAbstract[key]?.indexOf(0)]
-      } 
-    })
-
-    return {isAboutToWin, onIndex}
-  }
-
-  function aboutToLose(scenery, myMove) {
-    const intScenery = toIntegerScenery(scenery, invertPointOfView(myMove))
-    const intAbstract = abstractScenery(intScenery)
-    let isAboutToLose = false
-    let onKey = ''
-    let onIndex
-
-    Object.keys(intAbstract).forEach(key => {
-      if(intAbstract[key].reduce((a, b) => a + b, 0) === 2) {
-        isAboutToLose = true
-        onIndex = abstractSceneryMap[key][intAbstract[key]?.indexOf(0)]
-      }
-    })
-
-    return {isAboutToLose, onIndex}
-  }
-
   function invertPointOfView(myMove) {
     if(myMove === '') return ''
 
@@ -103,13 +82,9 @@ const evailsonScript = (scenery, myMove) => {
     }
   }
 
-  function getCurrRound(scenery) {
-    return scenery.join('')
-  }
-
-  return 0
+  return playIndex
 }
 
-//evailsonScript(sceneryTest, 'X')
+console.log(evailsonScript(sceneryTest, 'O'))
 
 test(() => evailsonScript(sceneryTest, 'X'))

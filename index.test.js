@@ -7,8 +7,9 @@ const test = (script) => {
     if (scriptReturn < 0) return console.error('ERROR: Number is too small')
     if (scriptReturn % 1 !== 0) return console.error('ERROR: The number is not an integer')
 
-  } catch {
+  } catch(e) {
     console.error('The script broke')
+    console.log(e)
   }
 }
 

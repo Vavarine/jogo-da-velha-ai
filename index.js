@@ -5,7 +5,11 @@ const sceneryTest = ['X', 'O', '',
                       '', '', 'O']
 
 const evailsonScript = (scenery, myMove) => {
+  console.clear()
+
   let playIndex = 0
+  let intScenery
+  let intAbstract
   const abstractSceneryMap = {
     firstDia: [0, 4, 8],
     secondDia: [2, 4, 6],
@@ -17,18 +21,41 @@ const evailsonScript = (scenery, myMove) => {
     thirdCol: [2, 5, 8],
   }
 
-  // Win on imminence
-  let intScenery = toIntegerScenery(scenery, myMove)
-  let intAbstract = abstractScenery(intScenery)
+  intScenery = toIntegerScenery(myMove)
+  intAbstract = abstractScenery(intScenery)
 
-  Object.keys(intAbstract).forEach(key => {
-    if(intAbstract[key].reduce((a, b) => a + b, 0) === 2) {
-      playIndex = abstractSceneryMap[key][intAbstract[key]?.indexOf(0)]
-    } 
-  })
+  // Play strategy
+  const playStrategy = {
+    false: () => {
+      const onRound = {
+        1: () => {
+          playIndex = 4
+
+          if(intScenery[4] !== 0) {
+            playIndex = playOnKey(getFreeKey(['firstDia', 'secondDia']))
+          }
+        },
+        2: () => {
+          playIndex = playOnKey(getFreeKey(['secondRow', 'secondCol']))
+        },
+      }
+
+      onRound[currentRound().toString()]?.()
+    },
+
+    true: () => {
+      playIndex = 0
+
+      if(intScenery[0] !== 0) {
+        playIndex = playOnKey(getFreeKey(['firstDia', 'secondDia']))
+      }
+    }
+  }
+
+  playStrategy[isFirstToPlay().toString()]()
 
   // Don't lose on iminence
-  intScenery = toIntegerScenery(scenery, invertPointOfView(myMove))
+  intScenery = toIntegerScenery(invertPointOfView(myMove))
   intAbstract = abstractScenery(intScenery)
 
   Object.keys(intAbstract).forEach(key => {
@@ -37,7 +64,18 @@ const evailsonScript = (scenery, myMove) => {
     }
   })
 
-  function toIntegerScenery(scenery, pointOfView) {
+  // Win on imminence
+  intScenery = toIntegerScenery(myMove)
+  intAbstract = abstractScenery(intScenery)
+
+  Object.keys(intAbstract).forEach(key => {
+    if(intAbstract[key].reduce((a, b) => a + b, 0) === 2) {
+      playIndex = abstractSceneryMap[key][intAbstract[key]?.indexOf(0)]
+    } 
+  })
+
+  // Helper functions
+  function toIntegerScenery(pointOfView) {
     const intScenery = []
 
     scenery.forEach(element => {
@@ -73,13 +111,71 @@ const evailsonScript = (scenery, myMove) => {
   }
 
   function invertPointOfView(myMove) {
-    if(myMove === '') return ''
+    let invertedMove = ''
 
-    if(myMove === "X") {
-      return "O"
-    } else {
-      return "X"
+    const invertedMoveMap = {
+      X: function()  {
+        invertedMove =  "O"
+      },
+      O: function() {
+        invertedMove =  "X"
+      }
     }
+
+    invertedMoveMap[myMove]()
+
+    return invertedMove
+  }
+
+  function isFirstToPlay() {
+    const myMoveQtd = scenery.filter(el => el === myMove).length
+    const opMoveQtd = scenery.filter(el => el === invertPointOfView(myMove)).length
+
+    if(myMoveQtd >= opMoveQtd || opMoveQtd === 0) {
+      return true
+    }
+
+    return false
+  }
+
+  function currentRound() {
+    return scenery.reduce((acc, cur) => {
+      if(cur === myMove) {
+        return acc + 1
+      }
+
+      return acc
+    }, 1)
+  }
+
+  function getFreeKey(keys) {
+    let freeIndexes = []
+
+    keys.forEach(key => {
+      if(intAbstract[key].reduce((a, b) => a + b, 0) < 5) {
+        freeIndexes.push(key)
+      }
+    })
+    console.log(keys)
+    console.log(freeIndexes[Math.floor(Math.random() * freeIndexes.length)])
+
+    return freeIndexes[Math.floor(Math.random() * freeIndexes.length)]
+  }
+
+  function playOnKey(key) {
+    if(!key) return 0
+
+    let move = abstractSceneryMap[key][Math.floor(Math.random() * 3)]
+
+    if(intScenery[move] !== 0) {
+      return playOnKey(key)
+    }
+
+    return move
+  }
+  
+  while(scenery[playIndex] !== '') {
+    playIndex++
   }
 
   return playIndex

@@ -5,8 +5,6 @@ const sceneryTest = ['X', 'O', '',
                       '', '', 'O']
 
 const evailsonScript = (scenery, myMove) => {
-  console.clear()
-
   let playIndex = 0
   let intScenery
   let intAbstract
@@ -30,13 +28,17 @@ const evailsonScript = (scenery, myMove) => {
       const onRound = {
         1: () => {
           playIndex = 4
-
+          
           if(intScenery[4] !== 0) {
             playIndex = playOnKey(getFreeKey(['firstDia', 'secondDia']))
           }
         },
         2: () => {
           playIndex = playOnKey(getFreeKey(['secondRow', 'secondCol']))
+
+          if(intScenery[4] === 3) {
+            playIndex = playOnKey(getFreeKey(['firstDia', 'secondDia']))
+          }
         },
       }
 
@@ -77,19 +79,26 @@ const evailsonScript = (scenery, myMove) => {
   // Helper functions
   function toIntegerScenery(pointOfView) {
     const intScenery = []
-
+    let toPush
+    
     scenery.forEach(element => {
-      if(element === pointOfView) {
-        intScenery.push(1)
-        return
+      toPush = 0
+
+      const pushMap = {
+        [pointOfView]: () => {
+          toPush = 1
+        }, 
+        [invertPointOfView(pointOfView)]: () => {
+          toPush = 3
+        },
+        ['']: () => {
+          toPush = 0
+        }
       }
 
-      if(element === invertPointOfView(pointOfView)) {
-        intScenery.push(3)
-        return
-      }
+      pushMap[element]()
 
-      intScenery.push(0)
+      intScenery.push(toPush)
     })
 
     return intScenery
@@ -140,10 +149,10 @@ const evailsonScript = (scenery, myMove) => {
 
   function currentRound() {
     return scenery.reduce((acc, cur) => {
-      if(cur === myMove) {
+      if(cur === myMove){
         return acc + 1
       }
-
+      
       return acc
     }, 1)
   }
@@ -156,8 +165,6 @@ const evailsonScript = (scenery, myMove) => {
         freeIndexes.push(key)
       }
     })
-    console.log(keys)
-    console.log(freeIndexes[Math.floor(Math.random() * freeIndexes.length)])
 
     return freeIndexes[Math.floor(Math.random() * freeIndexes.length)]
   }
@@ -175,12 +182,12 @@ const evailsonScript = (scenery, myMove) => {
   }
   
   while(scenery[playIndex] !== '') {
-    playIndex++
+    playIndex = Math.floor(Math.random() * 9)
   }
 
   return playIndex
 }
 
-console.log(evailsonScript(sceneryTest, 'O'))
+console.log(evailsonScript(sceneryTest, 'X'))
 
 test(() => evailsonScript(sceneryTest, 'X'))
